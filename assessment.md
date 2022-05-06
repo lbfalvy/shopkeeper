@@ -1,4 +1,4 @@
-Lawrence Bethlenfalvy, 2022-05-06
+Lawrence Bethlenfalvy, 2022-05-06  
 The authoritative version of this document is available at
 [https://github.com/lbfalvy/shopkeeper/blob/master/assessment.md]
 
