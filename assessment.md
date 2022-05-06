@@ -1,9 +1,13 @@
+Lawrence Bethlenfalvy, 2022-05-06
+The authoritative version of this document is available at
+[https://github.com/lbfalvy/shopkeeper/blob/master/assessment.md]
+
 This document is an assessment of my implementation in the context of the
 coursework.
 
 # Github
 
-My implementation's source code is available at
+The source code of my implementation is available at
 [https://github.com/lbfalvy/shopkeeper#Roadmap]
 
 # Conformance testing
@@ -21,6 +25,9 @@ of these to the RFC document. As a result, all of the above operations
 are completely functional across all 3 implementations. We did encounter
 some compatibility issues when initially comparing implementations but we
 promptly fixed them.
+
+The packet dump files from live tests of my implementation against the
+other two are available in the repository.
 
 # Proprietary extensions
 
