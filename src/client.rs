@@ -39,7 +39,7 @@ pub fn fetch(id: u32, server: &str) -> Option<Vec<u8>> {
 }
 
 fn fetch_slice(sock: &UdpSocket, msg: message::Message) -> Option<message::Message> {
-    let msg_buf = message::encode_message(msg);
+    let msg_buf = message::encode_message(&msg);
     let attempts = 3;
     let mut ans_buf = vec![0u8;MESSAGE_SIZE];
     loop {
@@ -48,7 +48,12 @@ fn fetch_slice(sock: &UdpSocket, msg: message::Message) -> Option<message::Messa
         } else {
             match sock.recv(&mut ans_buf) {
                 Err(_) => if (--attempts) == 0 { break None },
-                Ok(_) => { break message::parse_message(&ans_buf) }
+                Ok(_) => { 
+                    let answer = message::parse_message(&ans_buf)?;
+                    if message::matches(&msg, &answer) {
+                        break Some(answer);
+                    }
+                }
             }
         }
     }

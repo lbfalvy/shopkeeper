@@ -9,11 +9,17 @@ pub struct Message {
 pub const HEADER_LEN: usize = 19;
 
 pub fn parse_message(data: &[u8]) -> Option<Message> {
-    if data.len() < 19 { return None }
-    let checksum = data[3];
+    if data.len() < 19 {
+        eprintln!("Message shorter than header length {} < 19", data.len());
+        return None
+    }
+    let checksum = data[0];
     let body_len: usize = u16::from_le_bytes(data[17..19].try_into().unwrap()).try_into().ok()?;
     let msg_len = 19 + body_len;
-    if data.len() < msg_len { return None }
+    if data.len() < msg_len {
+        eprintln!("Message shorter than reported body length + header {}", msg_len);
+        return None
+    }
     if lrc(&data[4..msg_len]) != checksum { return None }
     Some(Message {
         mtype: data[4],
@@ -24,7 +30,7 @@ pub fn parse_message(data: &[u8]) -> Option<Message> {
     })
 }
 
-pub fn encode_message(data: Message) -> Vec<u8> {
+pub fn encode_message(data: &Message) -> Vec<u8> {
     let total_len = data.body.len() + HEADER_LEN;
     let mut buf = vec![0u8; total_len];
     let len_field:u16 = data.body.len().try_into().unwrap();
@@ -35,7 +41,7 @@ pub fn encode_message(data: Message) -> Vec<u8> {
     buf[17..19].clone_from_slice(&len_field.to_le_bytes());
     buf[19..total_len].clone_from_slice(&data.body);
     let checksum = lrc(&buf[4..total_len]);
-    buf[3] = checksum;
+    buf[0] = checksum;
     buf
 }
 
@@ -65,4 +71,10 @@ pub fn response(req: Message, body: Vec<u8>, last_slice: u32) -> Message {
         body,
         ..req
     }
+}
+
+pub fn matches(req: &Message, res: &Message) -> bool {
+    req.mtype == 1 && res.mtype == 2
+    && req.file == res.file
+    && req.slice == res.slice
 }

@@ -16,10 +16,11 @@ pub fn serve(path: PathBuf, interface: &str) {
     eprintln!("Serving {}", path.display());
     loop {
         let (_amt, src) = socket.recv_from(&mut buf).unwrap();
+        eprintln!("Received request:");
+        util::print_hex(&buf, 16);
         let result = message::parse_message(&buf);
         if result.is_none() {
-            eprintln!("Received malformed message:");
-            util::print_hex(&buf, 16);
+            eprintln!("Message is malformed");
             continue
         }
         let message = result.unwrap();
@@ -38,11 +39,13 @@ pub fn serve(path: PathBuf, interface: &str) {
             eprintln!("Not a file or directory: {}", req_path.display());
             continue
         };
-        let res_pkg = message::encode_message(message::response(
+        let res_pkg = message::encode_message(&message::response(
             message,
             body,
             total.try_into().unwrap()
         ));
+        eprintln!("Responding with:");
+        util::print_hex(&res_pkg, 16);
         let _res = socket.send_to(&res_pkg[..], src);
     }
 }
@@ -50,6 +53,9 @@ pub fn serve(path: PathBuf, interface: &str) {
 pub fn get_str_slice(data: &str, slice: usize) -> (Vec<u8>, usize) {
     let bytes = data.as_bytes();
     let start = (slice - 1) * SLICE_SIZE;
+    if bytes.len() < start {
+        return (vec![], last_slice(bytes.len()));
+    }
     let end = cmp::min(start + SLICE_SIZE, bytes.len());
     return (bytes[start..end].to_vec(), last_slice(bytes.len()));
 }
