@@ -8,10 +8,16 @@ pub fn cat(path: &str, server: &str) -> Option<Vec<u8>> {
     let segments: Vec<&str> = path.split_inclusive("/").collect();
     let mut data = fetch(0, server)?;
     for &seg in segments.iter() {
-        let id = String::from_utf8_lossy(&data).lines()
-            .find(|row| row.ends_with(seg))?
-            .split(":").next()?
-            .parse::<u32>().ok()?;
+        let (id, _, _) = String::from_utf8_lossy(&data).lines()
+            .filter_map(|row| match row.split(":").collect::<Vec<_>>()[..] {
+                [i, l, n] => Some((
+                    i.parse::<u32>().ok()?, 
+                    l.parse::<u32>().ok()?,
+                    n
+                )),
+                _ => None
+            })
+            .find(|&(_, _, n)| n == seg)?;
         data = fetch(id, server)?;
     }
     Some(data)
