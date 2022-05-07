@@ -1,6 +1,6 @@
 Lawrence Bethlenfalvy, 2022-05-06  
 The authoritative version of this document is available at
-[https://github.com/lbfalvy/shopkeeper/blob/master/assessment.md]
+https://github.com/lbfalvy/shopkeeper/blob/master/assessment.md
 
 This document is an assessment of my implementation in the context of the
 coursework.
@@ -8,7 +8,7 @@ coursework.
 # Github
 
 The source code of my implementation is available at
-[https://github.com/lbfalvy/shopkeeper#Roadmap]
+[github.com/lbfalvy/shopkeeper](https://github.com/lbfalvy/shopkeeper)
 
 # Conformance testing
 
@@ -39,7 +39,7 @@ name) is equivalent to the case described in the standard. As far as I
 know, no one else implemented this extension.
 
 I also have a number of ideas for further protocol extensions, described
-in the (Roadmap section of the README)[https://github.com/lbfalvy/shopkeeper#Roadmap].
+in the [Roadmap section of the README](https://github.com/lbfalvy/shopkeeper#Roadmap).
 
 # Designing for Robustness
 
