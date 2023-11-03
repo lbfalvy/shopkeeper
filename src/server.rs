@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::net::UdpSocket;
 use std::os::unix::prelude::FileExt;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::{cmp, fs};
 
 use crate::common::{parse_socket, MESSAGE_SIZE, SLICE_SIZE};
@@ -36,7 +36,7 @@ pub fn serve(path: PathBuf, interface: &str, log: usize) {
     let slice_index: usize = message.slice.try_into().unwrap();
     let req_path = &paths[file_idx];
     let (body, total): (Vec<u8>, usize) = if req_path.is_dir() {
-      let dir_contents = ls(&req_path, &indices);
+      let dir_contents = ls(req_path, &indices);
       get_str_slice(dir_contents.as_str(), slice_index)
     } else if req_path.is_file() {
       let file = fs::File::open(req_path).unwrap();
@@ -65,7 +65,7 @@ pub fn get_str_slice(data: &str, slice: usize) -> (Vec<u8>, usize) {
     return (vec![], last_slice(bytes.len()));
   }
   let end = cmp::min(start + SLICE_SIZE, bytes.len());
-  return (bytes[start..end].to_vec(), last_slice(bytes.len()));
+  (bytes[start..end].to_vec(), last_slice(bytes.len()))
 }
 
 pub fn get_file_slice(file: &fs::File, slice: usize) -> (Vec<u8>, usize) {
@@ -78,18 +78,18 @@ pub fn get_file_slice(file: &fs::File, slice: usize) -> (Vec<u8>, usize) {
   let readable = if last == slice { leftover } else { SLICE_SIZE };
   let mut result = vec![0u8; readable];
   let location: u64 = ((slice - 1) * SLICE_SIZE).try_into().unwrap();
-  if 0 < result.len() {
+  if !result.is_empty() {
     file.read_exact_at(&mut result[..], location).unwrap();
   }
-  return (result, last);
+  (result, last)
 }
 
 fn last_slice(len: usize) -> usize {
   let leftover = len % SLICE_SIZE;
-  return len / SLICE_SIZE + (if leftover == 0 { 0 } else { 1 });
+  len / SLICE_SIZE + (if leftover == 0 { 0 } else { 1 })
 }
 
-pub fn ls(path: &PathBuf, indices: &HashMap<PathBuf, usize>) -> String {
+pub fn ls(path: &Path, indices: &HashMap<PathBuf, usize>) -> String {
   path
     .read_dir()
     .unwrap()
@@ -122,7 +122,7 @@ pub fn ls(path: &PathBuf, indices: &HashMap<PathBuf, usize>) -> String {
     .collect::<String>()
 }
 
-pub fn tree(path: &PathBuf) -> (Vec<PathBuf>, HashMap<PathBuf, usize>) {
+pub fn tree(path: &Path) -> (Vec<PathBuf>, HashMap<PathBuf, usize>) {
   let mut paths: Vec<PathBuf> = Vec::new();
   let mut indices: HashMap<PathBuf, usize> = HashMap::new();
   collect_subtree(&path.canonicalize().unwrap(), &mut paths, &mut indices);
@@ -130,13 +130,13 @@ pub fn tree(path: &PathBuf) -> (Vec<PathBuf>, HashMap<PathBuf, usize>) {
 }
 
 fn collect_subtree(
-  path: &PathBuf,
+  path: &Path,
   paths: &mut Vec<PathBuf>,
   indices: &mut HashMap<PathBuf, usize>,
 ) {
   let pos = paths.len();
-  paths.push(path.clone());
-  indices.insert(path.clone(), pos);
+  paths.push(path.to_path_buf());
+  indices.insert(path.to_path_buf(), pos);
   if path.is_file() {
     return;
   }

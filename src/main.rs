@@ -31,7 +31,7 @@ $ shopkeeper cat <host>
     List the root directory on the server";
 
 fn main() {
-  let mut arguments = env::args().skip(1).filter(|s| !s.starts_with("-"));
+  let mut arguments = env::args().skip(1).filter(|s| !s.starts_with('-'));
   let cmd = arguments.next().expect("Subcommand required");
   if env::args().any(|arg| arg == "--help") {
     return println!("{HELP}");

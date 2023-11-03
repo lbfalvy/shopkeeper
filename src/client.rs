@@ -6,12 +6,12 @@ use crate::common::{parse_socket, MESSAGE_SIZE, SLICE_SIZE};
 use crate::message;
 
 pub fn cat(path: &str, server: &str) -> Option<Vec<u8>> {
-  let segments: Vec<&str> = path.split_inclusive("/").collect();
+  let segments: Vec<&str> = path.split_inclusive('/').collect();
   let mut data = fetch(0, server)?;
   for &seg in segments.iter() {
     let (id, ..) = String::from_utf8_lossy(&data)
       .lines()
-      .filter_map(|row| match row.split(":").collect::<Vec<_>>()[..] {
+      .filter_map(|row| match row.split(':').collect::<Vec<_>>()[..] {
         [i, l, n] => Some((i.parse::<u32>().ok()?, l.parse::<u32>().ok()?, n)),
         _ => None,
       })
@@ -54,17 +54,17 @@ fn fetch_slice(
   msg: message::Message,
 ) -> Option<message::Message> {
   let msg_buf = message::encode_message(&msg);
-  let attempts = 3;
+  let mut attempts: u8 = 3;
   let mut ans_buf = vec![0u8; MESSAGE_SIZE];
   loop {
     if sock.send(&msg_buf).is_err() {
       thread::sleep(Duration::from_secs(3))
     } else {
       match sock.recv(&mut ans_buf) {
-        Err(_) =>
-          if (--attempts) == 0 {
-            break None;
-          },
+        Err(_) => match attempts.checked_sub(1) {
+          Some(att) => attempts = att,
+          None => break None,
+        },
         Ok(_) => {
           let answer = message::parse_message(&ans_buf)?;
           if message::matches(&msg, &answer) {

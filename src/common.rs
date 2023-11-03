@@ -12,7 +12,7 @@ pub fn parse_socket(s: &str) -> SocketAddr {
       match portspec.is_empty() {
         true => 6677,
         false => portspec
-          .strip_prefix(":")
+          .strip_prefix(':')
           .expect("Expected : after localhsot")
           .parse()
           .expect("Expected port number"),
