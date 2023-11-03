@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {},
+	"extensions": {
+		"recommendations": [
+			"serayuzgur.crates",
+			"tamasfe.even-better-toml",
+			"rust-lang.rust-analyzer",
+			"tomoki1207.pdf"
+		]
+	}
+}
